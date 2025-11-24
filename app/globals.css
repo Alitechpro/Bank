@@ -1,3 +1,36 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* This is the ONLY line you need for Clerk to be styled by Tailwind */
+@layer clerk {
+  .cl-formButtonPrimary {
+    @apply bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white font-bold rounded-3xl shadow-xl transition transform hover:scale-105 py-5;
+  }
+  .cl-formFieldInput {
+    @apply border-2 border-gray-200 rounded-2xl px-6 py-5 text-lg focus:border-emerald-500 focus:outline-none transition;
+  }
+  .cl-card {
+    @apply bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20;
+  }
+  .cl-headerTitle {
+    @apply text-4xl font-black text-gray-900;
+  }
+  .cl-headerSubtitle {
+    @apply text-xl text-gray-600;
+  }
+  .cl-socialButtonsBlockButton {
+    @apply bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-lg py-4;
+  }
+}
+
+@layer utilities {
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+}
+
 @import "tailwindcss";
 
 :root {

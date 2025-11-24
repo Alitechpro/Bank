@@ -1,154 +1,178 @@
 // app/page.tsx
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
+"use client";
+
 import Link from "next/link";
+import { UserButton, SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import {
   ArrowRight,
   Shield,
-  Lock,
-  Globe,
-  Zap,
-  CheckCircle,
+  Building2,
+  HandCoins,
+  Users,
+  Sparkles,
+  Phone,
 } from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
+  const { openSignIn } = useClerk(); // This opens Clerk's official sign-in
+
+  const handleEmployeeLogin = () => {
+    openSignIn({
+      // Optional: customize redirect after login
+      afterSignInUrl: "/dashboard",
+      afterSignUpUrl: "/dashboard",
+    });
+  };
+
   return (
     <>
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-              ApexBank
-            </h1>
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600">
-              <Link href="#" className="hover:text-zinc-900 transition">
+      {/* Main Site - Premium Theme */}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+        {/* Navbar */}
+        <nav className="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+          <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+            <Link href="/" className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl">
+                <span className="text-white font-black text-3xl">A</span>
+              </div>
+              <span className="text-3xl font-black text-indigo-900">
+                Apna Bank
+              </span>
+            </Link>
+
+            <div className="hidden lg:flex items-center gap-12 font-semibold text-gray-700">
+              <Link href="#" className="hover:text-emerald-600 transition">
                 Personal
               </Link>
-              <Link href="#" className="hover:text-zinc-900 transition">
+              <Link href="#" className="hover:text-emerald-600 transition">
                 Business
               </Link>
-              <Link href="#" className="hover:text-zinc-900 transition">
-                Investments
-              </Link>
-              <Link href="#" className="hover:text-zinc-900 transition">
+              <Link href="#" className="hover:text-emerald-600 transition">
                 About
               </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-zinc-700 hover:text-zinc-900"
-              >
-                Dashboard
+              <Link href="#" className="hover:text-emerald-600 transition">
+                Contact
               </Link>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <SignedIn>
+                <Link
+                  href="/dashboard"
+                  className="font-bold text-indigo-700 hover:text-emerald-600"
+                >
+                  Dashboard
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+
+              <SignedOut>
+                <button
+                  onClick={handleEmployeeLogin}
+                  className="bg-gradient-to-r from-indigo-600 to-emerald-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition"
+                >
+                  Employee Login
+                </button>
+              </SignedOut>
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero */}
+        <section className="pt-40 pb-32 px-6 text-center">
+          <div className="max-w-5xl mx-auto">
+            <h1 className="text-6xl md:text-8xl font-black text-gray-900 leading-tight">
+              Banking That
+              <br />
+              <span className="bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent">
+                Feels Like Home
+              </span>
+            </h1>
+            <p className="mt-8 text-2xl text-gray-600 font-light max-w-3xl mx-auto">
+              Trusted microfinance banking for every Pakistani family. Simple.
+              Fast. Apna.
+            </p>
+
+            <div className="mt-12 flex flex-col sm:flex-row gap-6 justify-center">
               <Link
-                href="/sign-in"
-                className="text-sm font-medium text-zinc-700 hover:text-zinc-900"
+                href="#"
+                className="group px-12 py-6 bg-gradient-to-r from-indigo-600 to-emerald-600 text-white text-xl font-bold rounded-3xl shadow-2xl hover:shadow-2xl transform hover:scale-105 transition flex items-center justify-center gap-3"
               >
-                Sign in
+                Open Free Account
+                <ArrowRight className="group-hover:translate-x-2 transition" />
               </Link>
-              <Link
-                href="/sign-up"
-                className="ml-3 inline-flex items-center px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition shadow-sm"
+              <button
+                onClick={handleEmployeeLogin}
+                className="px-12 py-6 border-4 border-indigo-600 text-indigo-600 text-xl font-bold rounded-3xl hover:bg-indigo-600 hover:text-white transition shadow-xl"
               >
-                Open Account
-              </Link>
-            </SignedOut>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="pt-32 pb-24 px-6 bg-gradient-to-b from-white to-zinc-50">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-zinc-100 text-zinc-700 px-4 py-2 rounded-full text-xs font-medium mb-8">
-            <Shield className="w-4 h-4" />
-            FDIC Insured up to $250,000 · 256-bit encryption
-          </div>
-
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-zinc-900 max-w-5xl mx-auto leading-tight">
-            Banking that moves at the
-            <span className="bg-gradient-to-r from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
-              {" "}
-              speed of you
-            </span>
-          </h1>
-
-          <p className="mt-6 text-xl text-zinc-600 max-w-2xl mx-auto">
-            Zero fees. Instant transfers. Award-winning security. Join 2M+
-            customers who switched to smarter banking.
-          </p>
-
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-zinc-900 text-white font-medium text-lg hover:bg-zinc-800 transition shadow-lg"
-            >
-              Open Free Account
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-            <Link
-              href="#"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-2xl border-2 border-zinc-900 text-zinc-900 font-medium text-lg hover:bg-zinc-900 hover:text-white transition"
-            >
-              Download App
-            </Link>
-          </div>
-
-          <div className="mt-16 flex items-center justify-center gap-12 text-sm text-zinc-600">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              No hidden fees
+                Employee Portal
+              </button>
             </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              4.9★ on App Store
-            </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              24/7 human support
+
+            <div className="mt-20 flex items-center justify-center gap-12 text-gray-600">
+              <div className="text-center">
+                <Sparkles className="w-10 h-10 mx-auto text-emerald-600 mb-2" />
+                <p className="font-semibold">SBP Licensed</p>
+              </div>
+              <div className="text-center">
+                <Users className="w-10 h-10 mx-auto text-indigo-600 mb-2" />
+                <p className="font-semibold">1M+ Families</p>
+              </div>
+              <div className="text-center">
+                <Building2 className="w-10 h-10 mx-auto text-emerald-600 mb-2" />
+                <p className="font-semibold">300+ Branches</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Trust Badges */}
-      <section className="py-20 bg-white border-t border-zinc-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 items-center justify-center opacity-60">
-            <div className="text-center">
-              <Lock className="w-10 h-10 mx-auto text-zinc-700" />
-              <p className="mt-3 text-sm font-medium">Bank-Level Encryption</p>
-            </div>
-            <div className="text-center">
-              <Shield className="w-10 h-10 mx-auto text-zinc-700" />
-              <p className="mt-3 text-sm font-medium">FDIC Insured</p>
-            </div>
-            <div className="text-center">
-              <Zap className="w-10 h-10 mx-auto text-zinc-700" />
-              <p className="mt-3 text-sm font-medium">Instant Transfers</p>
-            </div>
-            <div className="text-center">
-              <Globe className="w-10 h-10 mx-auto text-zinc-700" />
-              <p className="mt-3 text-sm font-medium">Global Access</p>
-            </div>
+        {/* Features */}
+        <section className="py-32 px-6 bg-white/50">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-10">
+            {[
+              {
+                icon: Building2,
+                title: "Home Financing",
+                desc: "Build your dream home with easy monthly plans",
+              },
+              {
+                icon: HandCoins,
+                title: "Business Loans",
+                desc: "Grow your small business with instant funding",
+              },
+              {
+                icon: Users,
+                title: "Women Programs",
+                desc: "Special savings & loans for women entrepreneurs",
+              },
+            ].map((f, i) => (
+              <div
+                key={i}
+                className="group bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl border border-gray-100 transition transform hover:-translate-y-3"
+              >
+                <f.icon className="w-16 h-16 text-emerald-600 mb-6 group-hover:scale-110 transition" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  {f.title}
+                </h3>
+                <p className="text-gray-600 text-lg">{f.desc}</p>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-zinc-200 bg-zinc-50">
-        <div className="max-w-7xl mx-auto px-6 text-center text-sm text-zinc-600">
-          © 2025 ApexBank. All rights reserved. · Member FDIC · Equal Housing
-          Lender
-        </div>
-      </footer>
+        {/* Footer */}
+        <footer className="bg-gradient-to-t from-indigo-950 to-indigo-900 text-white py-16 px-6">
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="flex justify-center items-center gap-4 mb-6">
+              <Phone className="w-8 h-8" />
+              <span className="text-3xl font-bold">111-APNA-BANK</span>
+            </div>
+            <p className="text-indigo-200 text-lg">
+              © 2025 Apna Bank • Licensed by State Bank of Pakistan
+            </p>
+          </div>
+        </footer>
+      </div>
     </>
   );
 }
