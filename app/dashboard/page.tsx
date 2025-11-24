@@ -6,6 +6,7 @@ import {
   SignedIn,
   SignedOut,
   RedirectToSignIn,
+  useUser,
 } from "@clerk/nextjs";
 import {
   Plus,
@@ -34,27 +35,31 @@ interface Client {
   openingDate: Date;
 }
 
-const STORAGE_KEY = "apnaBankClients";
-
-// Clerk UserButton Dark Theme Fix (matches your dashboard perfectly)
+// Perfect Dark Theme for Clerk UserButton
 <style jsx global>{`
-  :where(.cl-userButtonPopoverFooter, .cl-userButtonPopoverActionButton) {
+  :where(
+      .cl-rootBox,
+      .cl-card,
+      .cl-userButtonPopoverFooter,
+      .cl-userButtonPopoverActionButton
+    ) {
     background-color: #111827 !important;
-    border-top: 1px solid #374151 !important;
+    border-color: #374151 !important;
   }
-  :where(.cl-userButtonPopoverActionButtonText) {
+  :where(.cl-userButtonPopoverActionButtonText, .cl-text) {
     color: #f3f4f6 !important;
   }
   :where(.cl-userButtonPopoverActionButton):hover {
     background-color: #1f2937 !important;
   }
   :where(.cl-userButtonBox) {
-    background-color: #1f2937 !important;
+    background: #1f2937 !important;
     border: 1px solid #374151 !important;
   }
 `}</style>;
 
 export default function Dashboard() {
+  const { user, isLoaded } = useUser();
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,50 +72,88 @@ export default function Dashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Load clients from server API
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setClients(
-        JSON.parse(saved).map((c: any) => ({
-          ...c,
-          openingDate: new Date(c.openingDate),
-        }))
-      );
-    } else {
-      setClients([
-        {
-          id: "1",
-          name: "Ahmed Khan",
-          accountNumber: "APN00123456",
-          openingDate: new Date("2024-02-15"),
-        },
-        {
-          id: "2",
-          name: "Sana Ali",
-          accountNumber: "APN00789123",
-          openingDate: new Date("2024-06-20"),
-        },
-        {
-          id: "3",
-          name: "Muhammad Asif",
-          accountNumber: "APN00987654",
-          openingDate: new Date("2025-01-10"),
-        },
-        {
-          id: "4",
-          name: "Fatima Rehman",
-          accountNumber: "APN00456789",
-          openingDate: new Date("2023-11-05"),
-        },
-      ]);
-    }
-  }, []);
+    if (!isLoaded || !user) return;
 
+    const loadClients = async () => {
+      try {
+        const res = await fetch("/api/save-clients");
+        if (!res.ok) throw new Error("Failed to load");
+        const data = await res.json();
+
+        if (data.clients && data.clients.length > 0) {
+          setClients(
+            data.clients.map((c: any) => ({
+              ...c,
+              openingDate: new Date(c.openingDate),
+            }))
+          );
+          toast.success("Data loaded successfully!");
+        } else {
+          // First time — create demo data
+          const demo = [
+            {
+              id: "1",
+              name: "Ahmed Khan",
+              accountNumber: "APN00123456",
+              openingDate: new Date("2024-02-15"),
+            },
+            {
+              id: "2",
+              name: "Sana Ali",
+              accountNumber: "APN00789123",
+              openingDate: new Date("2024-06-20"),
+            },
+            {
+              id: "3",
+              name: "Muhammad Asif",
+              accountNumber: "APN00987654",
+              openingDate: new Date("2025-01-10"),
+            },
+            {
+              id: "4",
+              name: "Fatima Rehman",
+              accountNumber: "APN00456789",
+              openingDate: new Date("2023-11-05"),
+            },
+          ];
+          setClients(demo);
+          await fetch("/api/save-clients", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clients: demo }),
+          });
+          toast.success("Demo data created!");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load data");
+      }
+    };
+
+    loadClients();
+  }, [user, isLoaded]);
+
+  // Auto-save when clients change
   useEffect(() => {
-    if (clients.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(clients));
+    if (clients.length > 0 && user) {
+      const timer = setTimeout(async () => {
+        try {
+          const res = await fetch("/api/save-clients", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clients }),
+          });
+          if (res.ok) toast.success("Data saved!");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to save data");
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [clients]);
+  }, [clients, user]);
 
   const filteredClients = useMemo(
     () =>
@@ -144,38 +187,6 @@ export default function Dashboard() {
     setFormData({ name: "", accountNumber: "", openingDate: "" });
   };
 
-  const handleSave = async () => {
-    if (!formData.name || !formData.accountNumber || !formData.openingDate) {
-      toast.error("Please fill all fields");
-      return;
-    }
-    setIsSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-
-    if (editingClient) {
-      setClients(
-        clients.map((c) =>
-          c.id === editingClient.id
-            ? { ...c, ...formData, openingDate: new Date(formData.openingDate) }
-            : c
-        )
-      );
-      toast.success("Client updated!");
-    } else {
-      setClients([
-        ...clients,
-        {
-          id: Date.now().toString(),
-          ...formData,
-          openingDate: new Date(formData.openingDate),
-        },
-      ]);
-      toast.success("Client added!");
-    }
-    setIsSaving(false);
-    closeModal();
-  };
-
   const openAddModal = () => {
     setEditingClient(null);
     setFormData({ name: "", accountNumber: "", openingDate: "" });
@@ -191,6 +202,55 @@ export default function Dashboard() {
     });
     setIsModalOpen(true);
   };
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.accountNumber || !formData.openingDate) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    setIsSaving(true);
+    await new Promise((r) => setTimeout(r, 600));
+
+    if (editingClient) {
+      setClients((prev) =>
+        prev.map((c) =>
+          c.id === editingClient.id
+            ? { ...c, ...formData, openingDate: new Date(formData.openingDate) }
+            : c
+        )
+      );
+      toast.success("Client updated!");
+    } else {
+      setClients((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          ...formData,
+          openingDate: new Date(formData.openingDate),
+        },
+      ]);
+      toast.success("Client added!");
+    }
+
+    setIsSaving(false);
+    closeModal();
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Delete permanently?")) {
+      setClients(clients.filter((c) => c.id !== id));
+      toast.success("Client deleted!");
+    }
+  };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -324,13 +384,7 @@ export default function Dashboard() {
                                 <Edit className="w-5 h-5" />
                               </button>
                               <button
-                                onClick={() =>
-                                  confirm("Delete permanently?") &&
-                                  setClients(
-                                    clients.filter((c) => c.id !== client.id)
-                                  ) &&
-                                  toast.success("Deleted")
-                                }
+                                onClick={() => handleDelete(client.id)}
                                 className="text-red-400 hover:text-red-300"
                               >
                                 <Trash2 className="w-5 h-5" />
@@ -340,7 +394,6 @@ export default function Dashboard() {
                         ))}
                       </tbody>
                     </table>
-
                     {filteredClients.length === 0 && (
                       <div className="text-center py-32">
                         <AlertCircle className="w-20 h-20 mx-auto text-gray-600 mb-4" />
@@ -424,7 +477,6 @@ export default function Dashboard() {
           )}
         </div>
       </SignedIn>
-
       <SignedOut>
         <RedirectToSignIn />
       </SignedOut>
