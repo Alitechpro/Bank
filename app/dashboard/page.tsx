@@ -78,7 +78,7 @@ export default function Dashboard() {
 
     const loadClients = async () => {
       try {
-        const res = await fetch("/api/save-clients");
+        const res = await fetch("/api/save-clients", { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to load");
         const data = await res.json();
 
@@ -89,7 +89,6 @@ export default function Dashboard() {
               openingDate: new Date(c.openingDate),
             }))
           );
-          toast.success("Data loaded successfully!");
         } else {
           // First time — create demo data
           const demo = [
@@ -124,11 +123,9 @@ export default function Dashboard() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ clients: demo }),
           });
-          toast.success("Demo data created!");
         }
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load data");
       }
     };
 
@@ -145,10 +142,9 @@ export default function Dashboard() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ clients }),
           });
-          if (res.ok) toast.success("Data saved!");
+          if (res.ok) console.log("Saved to Clerk!");
         } catch (err) {
           console.error(err);
-          toast.error("Failed to save data");
         }
       }, 1000);
       return () => clearTimeout(timer);
@@ -240,7 +236,7 @@ export default function Dashboard() {
   const handleDelete = (id: string) => {
     if (confirm("Delete permanently?")) {
       setClients(clients.filter((c) => c.id !== id));
-      toast.success("Client deleted!");
+      toast.success("Deleted!");
     }
   };
 
